@@ -1,0 +1,76 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 8 Mar 2023 00:45:51 +0100
+Subject: tests/conform: Use epsilon to compare floating numbers
+
+These tests may fail in i386, so let's use some safer comparisons
+---
+ tests/conform/animator.c | 6 +++---
+ tests/conform/interval.c | 4 ++--
+ tests/conform/units.c    | 2 +-
+ 3 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/tests/conform/animator.c b/tests/conform/animator.c
+index 9711699..8530feb 100644
+--- a/tests/conform/animator.c
++++ b/tests/conform/animator.c
+@@ -51,7 +51,7 @@ animator_multi_properties (void)
+     }
+ 
+   g_assert (clutter_animator_key_get_object (key) != NULL);
+-  g_assert_cmpfloat (clutter_animator_key_get_progress (key), ==, 0.2);
++  g_assert_cmpfloat_with_epsilon (clutter_animator_key_get_progress (key), 0.2, 0.00001);
+   g_assert_cmpstr (clutter_animator_key_get_property_name (key), ==, "x");
+ 
+   g_assert (clutter_animator_key_get_property_type (key) == G_TYPE_FLOAT);
+@@ -86,7 +86,7 @@ animator_multi_properties (void)
+     }
+ 
+   g_assert (clutter_animator_key_get_object (key) != NULL);
+-  g_assert_cmpfloat (clutter_animator_key_get_progress (key), ==, 0.8);
++  g_assert_cmpfloat_with_epsilon (clutter_animator_key_get_progress (key), 0.8, 0.00001);
+   g_assert_cmpstr (clutter_animator_key_get_property_name (key), ==, "y");
+ 
+   g_assert (clutter_animator_key_get_property_type (key) == G_TYPE_FLOAT);
+@@ -148,7 +148,7 @@ animator_properties (void)
+     }
+ 
+   g_assert (clutter_animator_key_get_object (key) != NULL);
+-  g_assert_cmpfloat (clutter_animator_key_get_progress (key), ==, 0.2);
++  g_assert_cmpfloat_with_epsilon (clutter_animator_key_get_progress (key), 0.2, 0.00001);
+   g_assert_cmpstr (clutter_animator_key_get_property_name (key), ==, "x");
+ 
+   g_assert (clutter_animator_key_get_property_type (key) == G_TYPE_FLOAT);
+diff --git a/tests/conform/interval.c b/tests/conform/interval.c
+index 5204378..2d73545 100644
+--- a/tests/conform/interval.c
++++ b/tests/conform/interval.c
+@@ -91,14 +91,14 @@ interval_from_script (void)
+                     g_type_name (G_VALUE_TYPE (initial)),
+                     g_value_get_float (initial));
+   g_assert (G_VALUE_HOLDS (initial, G_TYPE_FLOAT));
+-  g_assert_cmpfloat (g_value_get_float (initial), ==, 23.3f);
++  g_assert_cmpfloat_with_epsilon (g_value_get_float (initial), 23.3f, 0.0001);
+   final = clutter_interval_peek_final_value (interval);
+   if (g_test_verbose ())
+     g_test_message ("\tfinal ['%s'] = '%.2f'",
+                     g_type_name (G_VALUE_TYPE (final)),
+                     g_value_get_float (final));
+   g_assert (G_VALUE_HOLDS (final, G_TYPE_FLOAT));
+-  g_assert_cmpfloat (g_value_get_float (final), ==, 42.2f);
++  g_assert_cmpfloat_with_epsilon (g_value_get_float (final), 42.2f, 0.00001);
+ 
+   interval = CLUTTER_INTERVAL (clutter_script_get_object (script, "int-2"));
+   initial = clutter_interval_peek_initial_value (interval);
+diff --git a/tests/conform/units.c b/tests/conform/units.c
+index 06bfaf5..d320c12 100644
+--- a/tests/conform/units.c
++++ b/tests/conform/units.c
+@@ -94,7 +94,7 @@ units_string (void)
+ 
+   g_assert (clutter_units_from_string (&units, "5.1cm") == TRUE);
+   g_assert (clutter_units_get_unit_type (&units) == CLUTTER_UNIT_CM);
+-  g_assert_cmpfloat (clutter_units_get_unit_value (&units), ==, 5.1f);
++  g_assert_cmpfloat_with_epsilon (clutter_units_get_unit_value (&units), 5.1f, 0.00001);
+ 
+   g_assert (clutter_units_from_string (&units, "5,mm") == FALSE);
+ 

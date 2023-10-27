@@ -1,0 +1,20 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 7 Mar 2023 21:36:20 +0100
+Subject: clutter/meson: Include clutter dependencies in .pc file
+
+---
+ clutter/meson.build | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/clutter/meson.build b/clutter/meson.build
+index ec166be..2bbea81 100644
+--- a/clutter/meson.build
++++ b/clutter/meson.build
+@@ -802,6 +802,7 @@ pkgconf.generate(
+     'apiversion=@0@'.format(clutter_api_version),
+     'backends=@0@'.format(','.join(enabled_backends)),
+   ],
++  libraries: clutter_deps + mathlib_dep,
+   filebase: clutter_api_name,
+   subdirs: clutter_api_name,
+ )

@@ -1,0 +1,62 @@
+From: Jeremy Bicha <jbicha@linux.com>
+Date: Tue, 7 Mar 2023 17:01:34 +0100
+Subject: Build without the cookbook directory
+
+Forwarded: no
+---
+ Makefile.am     | 1 -
+ configure.ac    | 3 ---
+ doc/Makefile.am | 6 +-----
+ doc/meson.build | 1 -
+ 4 files changed, 1 insertion(+), 10 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index c4d56d8..06cb3bb 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -30,7 +30,6 @@ meson_files = \
+ 	clutter/meson.build \
+ 	clutter/cex100/meson.build \
+ 	doc/meson.build \
+-	doc/cookbook/meson.build \
+ 	doc/reference/meson.build \
+ 	doc/reference/xml/gtkdocentities.ent.in \
+ 	doc/reference/xml/meson.build \
+diff --git a/configure.ac b/configure.ac
+index eec8235..b8f6f35 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1207,9 +1207,6 @@ AC_CONFIG_FILES([
+ 
+ 	doc/Makefile
+ 	doc/reference/Makefile
+-	doc/cookbook/Makefile
+-	doc/cookbook/clutter-cookbook.xml
+-	doc/cookbook/examples/Makefile
+ 
+ 	po/Makefile.in
+ ])
+diff --git a/doc/Makefile.am b/doc/Makefile.am
+index 3a7d041..1262eaf 100644
+--- a/doc/Makefile.am
++++ b/doc/Makefile.am
+@@ -4,11 +4,7 @@ if BUILD_GTK_DOC
+ SUBDIRS += reference
+ endif
+ 
+-if ENABLE_DOCS
+-SUBDIRS += cookbook
+-endif
+-
+-DIST_SUBDIRS = reference cookbook
++DIST_SUBDIRS = reference
+ 
+ EXTRA_DIST = \
+ 	CODING_STYLE.txt \
+diff --git a/doc/meson.build b/doc/meson.build
+index b4fa887..ead14c4 100644
+--- a/doc/meson.build
++++ b/doc/meson.build
+@@ -1,2 +1 @@
+ subdir('reference')
+-subdir('cookbook')

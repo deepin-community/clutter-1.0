@@ -1,0 +1,4 @@
+usr/libexec/installed-tests/clutter/scripts
+usr/libexec/installed-tests/clutter
+usr/share/clutter-1.0/valgrind/
+usr/share/installed-tests

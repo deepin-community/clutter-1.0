@@ -1,0 +1,21 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 7 Mar 2023 19:59:06 +0100
+Subject: clutter/meson: Ensure all wayland compositor APIs are built
+
+---
+ clutter/meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/clutter/meson.build b/clutter/meson.build
+index 4fc76e6..ec166be 100644
+--- a/clutter/meson.build
++++ b/clutter/meson.build
+@@ -355,7 +355,7 @@ if enabled_backends.contains('wayland')
+     '#define CLUTTER_INPUT_WAYLAND "wayland"',
+   ]
+ 
+-  if get_variable('enable_wayland_compositor', false)
++  if get_option('wayland_compositor')
+     clutter_config += '#define CLUTTER_HAS_WAYLAND_COMPOSITOR_SUPPORT 1'
+   endif
+ endif

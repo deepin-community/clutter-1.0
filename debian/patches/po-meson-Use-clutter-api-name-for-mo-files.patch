@@ -1,0 +1,20 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 10 Mar 2023 07:59:34 +0100
+Subject: po/meson: Use clutter api name for mo files
+
+---
+ po/meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/po/meson.build b/po/meson.build
+index ce66f91..b58faed 100644
+--- a/po/meson.build
++++ b/po/meson.build
+@@ -1,6 +1,6 @@
+ i18n = import('i18n')
+ 
+ i18n.gettext(
+-  meson.project_name(),
++  clutter_api_name,
+   preset: 'glib',
+ )
