@@ -1,0 +1,21 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 7 Mar 2023 19:31:41 +0100
+Subject: clutter/meson: Enable xkb utils if evdev is used
+
+---
+ clutter/meson.build | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/clutter/meson.build b/clutter/meson.build
+index 0c34638..4fc76e6 100644
+--- a/clutter/meson.build
++++ b/clutter/meson.build
+@@ -684,6 +684,8 @@ endif
+ need_xkb_utils = enabled_backends.contains('wayland') or enabled_backends.contains('mir')
+ 
+ if enabled_input_backends.contains('evdev')
++  need_xkb_utils = true
++
+   backend_deps += [
+     dependency('libinput', version: libinput_req_version),
+     dependency('gudev-1.0', version: libudev_req_version),

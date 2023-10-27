@@ -1,0 +1,13 @@
+01_do-not-build-cookbook.patch
+Rely-on-gdk-to-dispatch-wayland-events.patch
+clutter-text-Do-not-emit-signal-on-finalization.patch
+clutter-meson-Enable-xkb-utils-if-evdev-is-used.patch
+clutter-meson-Ensure-all-wayland-compositor-APIs-are-buil.patch
+clutter-meson-Include-clutter-dependencies-in-.pc-file.patch
+tests-conform-meson.build-Install-script-files-too.patch
+tests-conform-Use-epsilon-to-compare-floating-numbers.patch
+clutter-master-clock-gdk-Do-not-try-to-access-invalidated.patch
+clutter-meson-Produce-all-Clutter-gir-files.patch
+po-meson-Use-clutter-api-name-for-mo-files.patch
+clutter-meson-Install-glx-headers-in-proper-subpath.patch
+configure.ac-Use-proper-clutter-micro-version.patch

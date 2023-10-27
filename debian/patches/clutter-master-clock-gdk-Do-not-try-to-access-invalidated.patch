@@ -1,0 +1,62 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 8 Mar 2023 17:45:29 +0100
+Subject: clutter-master-clock-gdk: Do not try to access invalidated list
+
+During a stage update a stage could be removed, this was handled only once
+and when it happened we did not care about updating the list of of stages
+we're going through, with possible access to invalid or free'd memory.
+
+So we while iterating and after processing the events we need to check if a
+stage is still valid, if that's the case we just continue in the normal way
+otherwise we ignore further stage operations and we fetch again the list
+we're iterating on, in case that has changed.
+
+See: https://autopkgtest.ubuntu.com/results/autopkgtest-lunar/lunar/amd64/c/clutter-1.0/20230308_084252_929ac@/log.gz
+---
+ clutter/gdk/clutter-master-clock-gdk.c | 19 ++++++++++++++++---
+ 1 file changed, 16 insertions(+), 3 deletions(-)
+
+diff --git a/clutter/gdk/clutter-master-clock-gdk.c b/clutter/gdk/clutter-master-clock-gdk.c
+index 90c4cce..b9e60ca 100644
+--- a/clutter/gdk/clutter-master-clock-gdk.c
++++ b/clutter/gdk/clutter-master-clock-gdk.c
+@@ -264,7 +264,7 @@ static void
+ clutter_master_clock_gdk_update (GdkFrameClock         *frame_clock,
+                                  ClutterMasterClockGdk *master_clock)
+ {
+-  GList *stages, *l;
++  GList *stages, *l, *next;
+ 
+   _clutter_threads_acquire_lock ();
+ 
+@@ -279,7 +279,7 @@ clutter_master_clock_gdk_update (GdkFrameClock         *frame_clock,
+   stages = g_hash_table_lookup (master_clock->clock_to_stage, frame_clock);
+   CLUTTER_NOTE (SCHEDULER, "Updating %d stages tied to frame clock %p",
+                 g_list_length (stages), frame_clock);
+-  for (l = stages; l != NULL; l = l->next)
++  for (l = stages; l != NULL; l = next)
+     {
+       ClutterStage *stage = l->data;
+ 
+@@ -304,7 +304,20 @@ clutter_master_clock_gdk_update (GdkFrameClock         *frame_clock,
+       if (g_hash_table_lookup (master_clock->stage_to_clock, stage) != NULL)
+         {
+           master_clock_update_stage (master_clock, stage);
+-          master_clock_schedule_stage_update (master_clock, stage, frame_clock);
++
++          if (g_hash_table_lookup (master_clock->stage_to_clock, stage) != NULL)
++            {
++              master_clock_schedule_stage_update (master_clock, stage, frame_clock);
++              next = l->next;
++            }
++          else
++            {
++              next = g_hash_table_lookup (master_clock->clock_to_stage, frame_clock);
++            }
++        }
++      else
++        {
++          next = g_hash_table_lookup (master_clock->clock_to_stage, frame_clock);
+         }
+     }
+ 

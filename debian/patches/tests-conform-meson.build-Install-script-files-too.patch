@@ -1,0 +1,19 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 7 Mar 2023 21:45:57 +0100
+Subject: tests/conform/meson.build: Install script files too
+
+---
+ tests/conform/meson.build | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/tests/conform/meson.build b/tests/conform/meson.build
+index 25c03c7..9f040a0 100644
+--- a/tests/conform/meson.build
++++ b/tests/conform/meson.build
+@@ -94,3 +94,6 @@ foreach suite: conformance_suites
+     )
+   endforeach
+ endforeach
++
++install_subdir('scripts',
++  install_dir: installed_test_bindir)

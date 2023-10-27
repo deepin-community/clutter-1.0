@@ -1,0 +1,37 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 10 Mar 2023 08:03:47 +0100
+Subject: clutter/meson: Install glx headers in proper subpath
+
+---
+ clutter/meson.build | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/clutter/meson.build b/clutter/meson.build
+index fa35984..59cd992 100644
+--- a/clutter/meson.build
++++ b/clutter/meson.build
+@@ -465,15 +465,21 @@ if enabled_backends.contains('x11')
+   x11_headers = [
+     'x11/clutter-x11.h',
+     'x11/clutter-x11-texture-pixmap.h',
+-
+-    'x11/clutter-glx.h',
+-    'x11/clutter-glx-texture-pixmap.h',
+   ]
+ 
+   install_headers(x11_headers,
+     install_dir: join_paths(clutter_full_includedir, 'x11'),
+   )
+ 
++  glx_headers = [
++    'x11/clutter-glx.h',
++    'x11/clutter-glx-texture-pixmap.h',
++  ]
++  x11_headers += glx_headers
++  install_headers(glx_headers,
++    install_dir: join_paths(clutter_full_includedir, 'glx'),
++  )
++
+   backend_sources += x11_sources
+ 
+   backend_pc_files += [

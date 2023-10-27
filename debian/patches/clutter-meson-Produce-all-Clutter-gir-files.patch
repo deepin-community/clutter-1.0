@@ -1,0 +1,182 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 10 Mar 2023 07:59:16 +0100
+Subject: clutter/meson: Produce all Clutter gir files
+
+---
+ clutter/meson.build | 101 +++++++++++++++++++++++++++++++++++++++++++++-------
+ 1 file changed, 89 insertions(+), 12 deletions(-)
+
+diff --git a/clutter/meson.build b/clutter/meson.build
+index 2bbea81..fa35984 100644
+--- a/clutter/meson.build
++++ b/clutter/meson.build
+@@ -328,7 +328,7 @@ clutter_version_h.set('CLUTTER_MAJOR_VERSION', clutter_major_version)
+ clutter_version_h.set('CLUTTER_MINOR_VERSION', clutter_minor_version)
+ clutter_version_h.set('CLUTTER_MICRO_VERSION', clutter_micro_version)
+ clutter_version_h.set('CLUTTER_VERSION', meson.project_version())
+-configure_file(
++clutter_version_header = configure_file(
+   input: 'clutter-version.h.in',
+   output: 'clutter-version.h',
+   configuration: clutter_version_h,
+@@ -375,7 +375,7 @@ clutter_config += '#define CLUTTER_INPUT_NULL "null"'
+ 
+ clutter_config_h = configuration_data()
+ clutter_config_h.set('CLUTTER_CONFIG_DEFINES', '\n'.join(clutter_config))
+-configure_file(
++clutter_config_header = configure_file(
+   input: 'clutter-config.h.in',
+   output: 'clutter-config.h',
+   configuration: clutter_config_h,
+@@ -439,7 +439,7 @@ if enabled_backends.contains('x11')
+ 
+   backend_deps += x11_deps
+ 
+-  backend_sources += [
++  x11_sources = [
+     'x11/clutter-backend-x11.c',
+     'x11/clutter-device-manager-core-x11.c',
+     'x11/clutter-event-x11.c',
+@@ -451,27 +451,31 @@ if enabled_backends.contains('x11')
+   ]
+ 
+   if build_xi2
+-    backend_sources += [
++    x11_sources += [
+       'x11/clutter-device-manager-xi2.c',
+       'x11/clutter-input-device-xi2.c',
+     ]
+   endif
+ 
+-  backend_sources += [
++  x11_sources += [
+     'x11/xsettings/xsettings-client.c',
+     'x11/xsettings/xsettings-common.c',
+   ]
+ 
+-  install_headers([
+-      'x11/clutter-x11.h',
+-      'x11/clutter-x11-texture-pixmap.h',
++  x11_headers = [
++    'x11/clutter-x11.h',
++    'x11/clutter-x11-texture-pixmap.h',
+ 
+-      'x11/clutter-glx.h',
+-      'x11/clutter-glx-texture-pixmap.h',
+-    ],
++    'x11/clutter-glx.h',
++    'x11/clutter-glx-texture-pixmap.h',
++  ]
++
++  install_headers(x11_headers,
+     install_dir: join_paths(clutter_full_includedir, 'x11'),
+   )
+ 
++  backend_sources += x11_sources
++
+   backend_pc_files += [
+     [ 'clutter-x11-@0@'.format(clutter_api_version), 'Clutter (X11)', x11_deps ],
+     [ 'clutter-glx-@0@'.format(clutter_api_version), 'Clutter (X11)', x11_deps ],
+@@ -483,14 +487,16 @@ if enabled_backends.contains('gdk')
+ 
+   backend_deps += gdk_dep
+ 
+-  backend_sources += [
++  gdk_sources = [
+     'gdk/clutter-backend-gdk.c',
+     'gdk/clutter-device-manager-gdk.c',
+     'gdk/clutter-event-gdk.c',
+     'gdk/clutter-input-device-gdk.c',
+     'gdk/clutter-master-clock-gdk.c',
+     'gdk/clutter-stage-gdk.c',
++    'gdk/clutter-gdk.h',
+   ]
++  backend_sources += gdk_sources
+ 
+   backend_pc_files += [
+     [ 'clutter-gdk-@0@'.format(clutter_api_version), 'Clutter (GDK)', [gdk_dep] ],
+@@ -753,6 +759,8 @@ libclutter = library(
+ )
+ 
+ introspected_sources = [
++  clutter_config_header,
++  clutter_version_header,
+   clutter_public_headers,
+   sources,
+   clutter_deprecated_headers,
+@@ -783,6 +791,75 @@ if get_option('introspection')
+       '-DCLUTTER_COMPILATION=1',
+     ],
+   )
++
++  libclutter_gir_target = libclutter_gir[0]
++
++  gnome.generate_gir(
++    libclutter,
++    sources: cally_sources + cally_headers,
++    namespace: 'Cally',
++    nsversion: clutter_api_version,
++    export_packages: 'cally-' + clutter_api_version,
++    includes: libclutter_gir_target,
++    header: 'cally/cally.h',
++    install: true,
++    extra_args: [
++      '--quiet',
++      '-DCLUTTER_COMPILATION=1',
++    ],
++  )
++
++  if enabled_backends.contains('x11')
++
++    glx_clutter_glx_texture = custom_target(
++        'glx-clutter-glx-texture-pixmap.h',
++        output : 'clutter-glx-texture-pixmap.h',
++        input : 'x11/clutter-glx-texture-pixmap.h',
++        command : [
++          'sh', '-c',
++          'mkdir $1/glx && cp -v $2 $1/glx/$(basename $3) && touch $3', '--',
++          '@OUTDIR@', '@INPUT@', '@OUTPUT@'],
++    )
++
++    gnome.generate_gir(
++      libclutter,
++      sources: x11_sources + x11_headers + glx_clutter_glx_texture,
++      namespace: 'ClutterX11',
++      nsversion: clutter_api_version,
++      export_packages: 'clutter-x11-' + clutter_api_version,
++      includes: [
++        libclutter_gir_target,
++        'xlib-2.0',
++      ],
++      header: 'clutter/x11/clutter-x11.h',
++      install: true,
++      extra_args: [
++        '-I' + meson.current_source_dir() / '..',
++        '--quiet',
++        '-DCLUTTER_COMPILATION=1',
++      ],
++    )
++  endif
++
++  if (enabled_backends.contains('gdk'))
++    gnome.generate_gir(
++      libclutter,
++      sources: gdk_sources,
++      namespace: 'ClutterGdk',
++      nsversion: clutter_api_version,
++      export_packages: 'clutter-gdk-' + clutter_api_version,
++      includes: [
++        libclutter_gir_target,
++        'Gdk-3.0',
++      ],
++      header: 'clutter/gdk/clutter-gdk.h',
++      install: true,
++      extra_args: [
++        '--quiet',
++        '-DCLUTTER_COMPILATION=1',
++      ],
++    )
++  endif
+ else
+   libclutter_gir = []
+ endif

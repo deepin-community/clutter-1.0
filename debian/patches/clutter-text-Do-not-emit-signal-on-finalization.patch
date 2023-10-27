@@ -1,0 +1,29 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 7 Mar 2023 16:53:31 +0100
+Subject: clutter-text: Do not emit signal on finalization
+
+This is wrong and ensured not to happen by glib 2.75
+
+Origin: https://gitlab.gnome.org/3v1n0/clutter/-/commit/2ec2f2fc1dabe827
+---
+ clutter/clutter-text.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/clutter/clutter-text.c b/clutter/clutter-text.c
+index 0b83de9..228b004 100644
+--- a/clutter/clutter-text.c
++++ b/clutter/clutter-text.c
+@@ -1500,7 +1500,12 @@ clutter_text_finalize (GObject *gobject)
+ 
+   clutter_text_dirty_paint_volume (self);
+ 
+-  clutter_text_set_buffer (self, NULL);
++  if (priv->buffer)
++    {
++      buffer_disconnect_signals (self);
++      g_clear_object (&priv->buffer);
++    }
++
+   g_free (priv->font_name);
+ 
+   G_OBJECT_CLASS (clutter_text_parent_class)->finalize (gobject);
